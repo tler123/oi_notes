@@ -1,0 +1,672 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=yes">
+    <title>猜数游戏</title>
+    <style>
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            font-family: system-ui, -apple-system, 'Segoe UI', Roboto, 'Helvetica Neue', sans-serif;
+            background: #f2f7fc;
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 1.5rem;
+            color: #0b1c2f;
+        }
+
+        .game-card {
+            max-width: 780px;
+            width: 100%;
+            background: white;
+            border-radius: 40px;
+            box-shadow: 0 20px 40px -12px rgba(0, 20, 30, 0.18), 0 6px 16px rgba(0, 0, 0, 0.03);
+            padding: 2rem 1.8rem 2.5rem;
+            transition: box-shadow 0.2s;
+        }
+
+        h1 {
+            font-size: 2rem;
+            font-weight: 500;
+            letter-spacing: -0.02em;
+            color: #0d2b44;
+            display: flex;
+            align-items: center;
+            gap: 0.6rem;
+            flex-wrap: wrap;
+        }
+
+        .subhead {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 0.5rem 1rem;
+            font-size: 0.9rem;
+            color: #3e5f7a;
+            border-bottom: 1px solid #e2eaf2;
+            padding-bottom: 1rem;
+            margin-bottom: 1.8rem;
+        }
+
+        .status-badge {
+            background: #eaf1fa;
+            padding: 0.2rem 1rem;
+            border-radius: 40px;
+            font-size: 0.8rem;
+            font-weight: 500;
+            color: #1d4a73;
+        }
+
+        .secret-area {
+            background: #f0f6fe;
+            border-radius: 30px;
+            padding: 1.5rem 1.2rem 1.2rem;
+            margin-bottom: 1.8rem;
+            border: 1px solid #d8e5f2;
+        }
+
+        .secret-label {
+            font-size: 0.75rem;
+            text-transform: uppercase;
+            letter-spacing: 0.04em;
+            color: #3d627f;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 0 0.2rem 0.6rem;
+        }
+
+        .secret-label span:last-child {
+            background: #dce8f5;
+            padding: 0.1rem 0.8rem;
+            border-radius: 30px;
+            font-size: 0.7rem;
+            color: #1d4b70;
+        }
+
+        .range-indicator {
+            display: flex;
+            justify-content: center;
+            gap: 1rem 2rem;
+            flex-wrap: wrap;
+            font-size: 1.2rem;
+            font-weight: 500;
+            background: white;
+            padding: 0.6rem 0.8rem;
+            border-radius: 60px;
+            border: 1px solid #d0def0;
+            box-shadow: inset 0 1px 4px rgba(0,0,0,0.02);
+        }
+
+        .range-indicator .low, .range-indicator .high {
+            background: #eaf2fa;
+            padding: 0.2rem 1rem;
+            border-radius: 40px;
+            color: #0e375a;
+        }
+
+        .range-indicator .mid {
+            color: #2a5f88;
+            font-weight: 400;
+        }
+
+        .input-panel {
+            display: flex;
+            flex-wrap: wrap;
+            align-items: center;
+            gap: 0.8rem 1rem;
+            background: white;
+            border-radius: 60px;
+            padding: 0.6rem 1rem 0.6rem 1.8rem;
+            border: 1px solid #d5e1ef;
+            margin: 1.2rem 0 1rem;
+            box-shadow: 0 2px 6px rgba(0,0,0,0.01);
+        }
+
+        .input-panel label {
+            font-weight: 450;
+            color: #1d3d5a;
+            font-size: 0.95rem;
+        }
+
+        .input-panel input[type="number"] {
+            flex: 1;
+            min-width: 100px;
+            padding: 0.5rem 0.8rem;
+            border: 1px solid #cbd9eb;
+            border-radius: 60px;
+            font-size: 1.1rem;
+            font-weight: 500;
+            background: #fafdff;
+            outline: none;
+            transition: 0.15s;
+            font-family: inherit;
+            color: #0b2e4a;
+        }
+
+        .input-panel input[type="number"]:focus {
+            border-color: #3b82d6;
+            box-shadow: 0 0 0 3px rgba(59, 130, 214, 0.15);
+            background: white;
+        }
+
+        .input-panel input[type="number"]::-webkit-outer-spin-button,
+        .input-panel input[type="number"]::-webkit-inner-spin-button {
+            -webkit-appearance: none;
+            margin: 0;
+        }
+        .input-panel input[type="number"] {
+            -moz-appearance: textfield;
+        }
+
+        .btn-group {
+            display: flex;
+            gap: 0.6rem;
+            flex-wrap: wrap;
+        }
+
+        .btn {
+            border: none;
+            background: #eaf1f9;
+            padding: 0.5rem 1.4rem;
+            border-radius: 60px;
+            font-weight: 500;
+            font-size: 0.9rem;
+            color: #1d4060;
+            cursor: pointer;
+            transition: 0.12s;
+            border: 1px solid transparent;
+            display: inline-flex;
+            align-items: center;
+            gap: 0.3rem;
+            box-shadow: 0 1px 2px rgba(0,0,0,0.02);
+        }
+
+        .btn-primary {
+            background: #1d6bc3;
+            color: white;
+            border-color: #1a5fb0;
+            box-shadow: 0 4px 8px -4px rgba(29, 107, 195, 0.25);
+        }
+
+        .btn-primary:hover {
+            background: #1a5fb0;
+            transform: scale(0.97);
+        }
+
+        .btn-primary:active {
+            transform: scale(0.94);
+        }
+
+        .btn-outline {
+            background: transparent;
+            border-color: #c7d8ec;
+        }
+
+        .btn-outline:hover {
+            background: #e6eefa;
+            border-color: #a2bbd9;
+        }
+
+        .btn:disabled {
+            opacity: 0.5;
+            pointer-events: none;
+            filter: grayscale(0.2);
+        }
+
+        .message-box {
+            background: #f6faff;
+            border-radius: 28px;
+            padding: 0.8rem 1.5rem;
+            margin: 1.2rem 0 0.8rem;
+            border-left: 4px solid #3b82d6;
+            font-size: 1rem;
+            color: #124072;
+            min-height: 3.2rem;
+            display: flex;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 0.2rem 0.6rem;
+            transition: 0.15s;
+            box-shadow: 0 1px 4px rgba(0,0,0,0.02);
+        }
+
+        .message-box .highlight {
+            font-weight: 600;
+            background: #dce8f8;
+            padding: 0.1rem 0.8rem;
+            border-radius: 40px;
+            color: #003b77;
+        }
+
+        .history-panel {
+            margin-top: 1.5rem;
+            background: #f9fcff;
+            border-radius: 24px;
+            padding: 0.8rem 1.2rem 0.6rem;
+            border: 1px solid #e2ebf5;
+        }
+
+        .history-header {
+            display: flex;
+            justify-content: space-between;
+            font-size: 0.7rem;
+            text-transform: uppercase;
+            letter-spacing: 0.03em;
+            color: #52728f;
+            padding-bottom: 0.3rem;
+            border-bottom: 1px dashed #dce6f0;
+            margin-bottom: 0.5rem;
+        }
+
+        .history-list {
+            display: flex;
+            flex-wrap: wrap;
+            align-items: center;
+            gap: 0.3rem 0.5rem;
+            min-height: 2.4rem;
+            padding: 0.2rem 0;
+        }
+
+        .history-item {
+            background: white;
+            border-radius: 30px;
+            padding: 0.1rem 0.8rem;
+            border: 1px solid #d2e0ef;
+            font-size: 0.85rem;
+            color: #1d3b57;
+            box-shadow: 0 1px 2px rgba(0,0,0,0.01);
+        }
+
+        .history-item .guess-num {
+            font-weight: 600;
+            color: #0a2d4a;
+        }
+
+        .history-item .hint {
+            color: #4f7497;
+            font-weight: 400;
+            margin-left: 0.2rem;
+        }
+
+        .stat-line {
+            display: flex;
+            justify-content: flex-end;
+            font-size: 0.8rem;
+            color: #3e627f;
+            gap: 1.2rem;
+            padding-top: 0.3rem;
+            border-top: 1px solid #e2ebf5;
+            margin-top: 0.6rem;
+        }
+
+        .stat-line strong {
+            color: #0b2a44;
+        }
+
+        .footer-actions {
+            display: flex;
+            justify-content: flex-end;
+            gap: 0.8rem;
+            margin-top: 0.6rem;
+        }
+
+        @media (max-width: 480px) {
+            .game-card { padding: 1.2rem 1rem; }
+            .input-panel { flex-direction: column; align-items: stretch; padding: 1rem; }
+            .btn-group { justify-content: stretch; }
+            .btn { flex: 1; justify-content: center; }
+            .range-indicator { font-size: 1rem; gap: 0.6rem; }
+        }
+    </style>
+</head>
+<body>
+
+<div class="game-card">
+    <h1>
+        <span>猜数游戏</span>
+    </h1>
+
+    <!-- 秘密数字 & 区间 -->
+    <div class="secret-area">
+        <div class="secret-label">
+            <span>📦 当前区间</span>
+            <span id="guessCountDisplay">已猜 0 次</span>
+        </div>
+        <div class="range-indicator" id="rangeDisplay">
+            <span class="low" id="lowLabel">1</span>
+            <span class="mid">⬅️  ➡️</span>
+            <span class="high" id="highLabel">100</span>
+        </div>
+    </div>
+
+    <!-- 输入猜测 -->
+    <div class="input-panel">
+        <label for="guessInput">你的猜测</label>
+        <input type="number" id="guessInput" min="1" max="100" value="50" step="1">
+        <div class="btn-group">
+            <button class="btn btn-primary" id="guessBtn">↵ 猜</button>
+            <button class="btn btn-outline" id="resetBtn">⟲ 新游戏</button>
+        </div>
+    </div>
+
+    <!-- 消息 -->
+    <div class="message-box" id="messageBox">
+        💡 输入数字，点击「猜」开始
+    </div>
+
+    <!-- 历史记录 & 统计 -->
+    <div class="history-panel">
+        <div class="history-header">
+            <span>📋 猜测记录</span>
+            <span id="worstCaseBadge">最坏次数: —</span>
+        </div>
+        <div class="history-list" id="historyList">
+            <span style="color: #849db6; font-size: 0.8rem;">还没有猜测</span>
+        </div>
+        <div class="stat-line">
+            <span>📊 当前最坏情况: <strong id="worstStat">0</strong> 次</span>
+            <span>🎯 最优最坏: <strong id="optimalWorst">7</strong> 次</span>
+        </div>
+        <div class="footer-actions">
+            <button class="btn btn-outline" id="autoOptimalBtn" style="font-size:0.75rem;">⚡ 演示最优策略</button>
+        </div>
+    </div>
+</div>
+
+<script>
+    (function(){
+        // ---------- 游戏状态 ----------
+        const MIN_NUM = 1;
+        const MAX_NUM = 100;
+
+        // 当前秘密数字 (由A选定)
+        let secretNumber = Math.floor(Math.random() * (MAX_NUM - MIN_NUM + 1)) + MIN_NUM;
+
+        // 当前区间 [low, high]
+        let low = MIN_NUM;
+        let high = MAX_NUM;
+
+        // 猜测历史 [{ guess, hint }]
+        let history = [];
+
+        // 游戏是否结束 (猜中)
+        let gameOver = false;
+
+        // 最优最坏次数 (二分查找上界)
+        const OPTIMAL_WORST = Math.ceil(Math.log2(MAX_NUM - MIN_NUM + 1)); // 7
+
+        // DOM 元素
+        const lowLabel = document.getElementById('lowLabel');
+        const highLabel = document.getElementById('highLabel');
+        const guessInput = document.getElementById('guessInput');
+        const guessBtn = document.getElementById('guessBtn');
+        const resetBtn = document.getElementById('resetBtn');
+        const messageBox = document.getElementById('messageBox');
+        const historyList = document.getElementById('historyList');
+        const guessCountDisplay = document.getElementById('guessCountDisplay');
+        const worstStat = document.getElementById('worstStat');
+        const optimalWorstSpan = document.getElementById('optimalWorst');
+        const worstCaseBadge = document.getElementById('worstCaseBadge');
+        const gameStatus = document.getElementById('gameStatus');
+        const autoOptimalBtn = document.getElementById('autoOptimalBtn');
+
+        // 显示最优最坏次数
+        optimalWorstSpan.textContent = OPTIMAL_WORST;
+
+        // ---------- 辅助函数 ----------
+        function updateRangeDisplay() {
+            lowLabel.textContent = low;
+            highLabel.textContent = high;
+        }
+
+        // 更新历史列表
+        function renderHistory() {
+            historyList.innerHTML = '';
+            if (history.length === 0) {
+                historyList.innerHTML = '<span style="color: #849db6; font-size: 0.8rem;">还没有猜测</span>';
+                return;
+            }
+            for (let entry of history) {
+                const item = document.createElement('span');
+                item.className = 'history-item';
+                const hintSymbol = entry.hint === 'correct' ? '🎯' : (entry.hint === 'high' ? '⬆️' : '⬇️');
+                item.innerHTML = `<span class="guess-num">${entry.guess}</span> <span class="hint">${hintSymbol}</span>`;
+                historyList.appendChild(item);
+            }
+            // 滚动到最新
+            historyList.scrollTop = historyList.scrollHeight;
+        }
+
+        // 更新统计 & 最坏情况 (当前历史长度即最坏情况下的次数)
+        function updateStats() {
+            const count = history.length;
+            guessCountDisplay.textContent = `已猜 ${count} 次`;
+            worstStat.textContent = count;
+            // 最坏次数 badge
+            if (gameOver) {
+                worstCaseBadge.textContent = `✅ 完成 (${count} 次)`;
+            } else {
+                worstCaseBadge.textContent = `最坏次数: ${count}`;
+            }
+            // 游戏状态
+            if (gameOver) {
+                gameStatus.textContent = '🎉 猜中！';
+                gameStatus.style.background = '#d4edda';
+                gameStatus.style.color = '#0a4b2a';
+            } else {
+                gameStatus.textContent = '⚡ 游戏中';
+                gameStatus.style.background = '#eaf1fa';
+                gameStatus.style.color = '#1d4a73';
+            }
+        }
+
+        // 重置消息 (保留样式)
+        function setMessage(text, isSuccess = false, isError = false) {
+            messageBox.innerHTML = text;
+            messageBox.style.borderLeftColor = isSuccess ? '#2b8c5e' : (isError ? '#b33a3a' : '#3b82d6');
+        }
+
+        // 核心: 处理猜测
+        function handleGuess(guess) {
+            // 如果游戏已结束, 提示并重置?
+            if (gameOver) {
+                setMessage('🎯 游戏已结束，点击「新游戏」再来一局', false, false);
+                return false;
+            }
+
+            // 验证输入
+            if (!Number.isInteger(guess) || guess < MIN_NUM || guess > MAX_NUM) {
+                setMessage(`⚠️ 请输入 ${MIN_NUM} ~ ${MAX_NUM} 之间的整数`, false, true);
+                return false;
+            }
+
+            // 判断是否在区间内 (但猜数可以超出当前区间？ 我们允许但是提示范围)
+            if (guess < low || guess > high) {
+                setMessage(`⛔ 当前区间是 [${low}, ${high}]，请猜区间内的数`, false, true);
+                return false;
+            }
+
+            // 记录猜测
+            let hint = '';
+            let msg = '';
+            let isCorrect = false;
+
+            if (guess === secretNumber) {
+                hint = 'correct';
+                isCorrect = true;
+                gameOver = true;
+                msg = `🎉 正确！就是 <strong>${secretNumber}</strong> ！ 你用了 ${history.length + 1} 次。`;
+                setMessage(msg, true, false);
+            } else if (guess < secretNumber) {
+                hint = 'low';
+                low = Math.max(low, guess + 1);
+                msg = `⬆️ 太小了！ 范围缩小至 [${low}, ${high}]`;
+                setMessage(msg, false, false);
+            } else { // guess > secretNumber
+                hint = 'high';
+                high = Math.min(high, guess - 1);
+                msg = `⬇️ 太大了！ 范围缩小至 [${low}, ${high}]`;
+                setMessage(msg, false, false);
+            }
+
+            // 记录历史
+            history.push({ guess, hint });
+            renderHistory();
+            updateRangeDisplay();
+            updateStats();
+
+            // 检查区间是否矛盾 (但不会发生)
+            if (low > high && !gameOver) {
+                // 异常情况，但理论上不会
+                gameOver = true;
+                setMessage(`⚠️ 区间矛盾，请重新开始`, false, true);
+            }
+
+            // 如果游戏结束，禁用猜按钮? 但是仍然可点，但会提示
+            if (gameOver) {
+                // 但保留重置
+            }
+
+            // 若区间只剩下一个数且未猜中，自动猜？ 但是玩家自己决定
+            // 不强制
+            return true;
+        }
+
+        // ---------- 重置游戏 ----------
+        function resetGame() {
+            // 重新生成秘密数字
+            secretNumber = Math.floor(Math.random() * (MAX_NUM - MIN_NUM + 1)) + MIN_NUM;
+            low = MIN_NUM;
+            high = MAX_NUM;
+            history = [];
+            gameOver = false;
+
+            // 重置UI
+            updateRangeDisplay();
+            renderHistory();
+            updateStats();
+            guessInput.value = Math.floor((low + high) / 2);
+            setMessage('🔄 新游戏开始！ 猜一个 1~100 的数字', false, false);
+            // 清除错误样式
+            messageBox.style.borderLeftColor = '#3b82d6';
+            gameStatus.textContent = '⚡ 游戏中';
+            gameStatus.style.background = '#eaf1fa';
+            gameStatus.style.color = '#1d4a73';
+            // 清空最坏完成标记
+            worstCaseBadge.textContent = `最坏次数: 0`;
+        }
+
+        // ---------- 演示最优策略 (自动二分) ----------
+        function autoOptimalPlay() {
+            if (gameOver) {
+                resetGame();
+                // 稍后继续执行
+            }
+            // 如果游戏未结束，模拟一次最优猜测 (二分)
+            if (!gameOver) {
+                // 计算当前最优猜测 (二分中位数)
+                let candidate = Math.floor((low + high) / 2);
+                // 防止死循环, 如果区间只有一个数，直接猜
+                if (low === high) {
+                    candidate = low;
+                }
+                guessInput.value = candidate;
+                // 自动触发猜测
+                const guessVal = parseInt(candidate, 10);
+                handleGuess(guessVal);
+                // 如果游戏结束后不再自动继续
+                if (gameOver) {
+                    setMessage(`🎯 演示完成！ 共 ${history.length} 次猜中。`, true, false);
+                } else {
+                    // 继续演示 (递归调用，但防止堆栈溢出，用setTimeout)
+                    setTimeout(() => {
+                        autoOptimalPlay();
+                    }, 400);
+                }
+            } else {
+                // 游戏结束，重置并开始
+                resetGame();
+                setTimeout(() => {
+                    autoOptimalPlay();
+                }, 300);
+            }
+        }
+
+        // ---------- 事件绑定 ----------
+        guessBtn.addEventListener('click', function() {
+            if (gameOver) {
+                setMessage('🎯 游戏已结束，点击「新游戏」再来一局', false, false);
+                return;
+            }
+            const rawValue = guessInput.value.trim();
+            if (rawValue === '') {
+                setMessage('请输入一个数字', false, true);
+                return;
+            }
+            const guess = Number(rawValue);
+            if (!Number.isInteger(guess)) {
+                setMessage('请输入整数', false, true);
+                return;
+            }
+            handleGuess(guess);
+        });
+
+        // 回车键支持
+        guessInput.addEventListener('keydown', function(e) {
+            if (e.key === 'Enter') {
+                e.preventDefault();
+                guessBtn.click();
+            }
+        });
+
+        resetBtn.addEventListener('click', function() {
+            resetGame();
+        });
+
+        autoOptimalBtn.addEventListener('click', function() {
+            // 如果游戏未结束，直接开始演示；如果结束则重置再演示
+            if (gameOver) {
+                resetGame();
+            }
+            // 清除之前的消息
+            setMessage('⚡ 自动演示最优策略 (二分查找) ...', false, false);
+            // 延迟开始，避免与重置冲突
+            setTimeout(() => {
+                autoOptimalPlay();
+            }, 200);
+        });
+
+        // 初始化
+        resetGame();
+
+        // 额外: 输入框限制范围
+        guessInput.addEventListener('blur', function() {
+            let val = parseInt(this.value, 10);
+            if (!isNaN(val)) {
+                if (val < MIN_NUM) this.value = MIN_NUM;
+                if (val > MAX_NUM) this.value = MAX_NUM;
+            }
+        });
+
+        // 窗口加载完成额外设置
+        window.addEventListener('load', function() {
+            // 设置默认猜测为中间值
+            guessInput.value = Math.floor((low + high) / 2);
+        });
+
+        // 暴露一些变量用于调试 (可选)
+        console.log('🎮 猜数字游戏已启动, 秘密数字 =', secretNumber);
+
+    })();
+</script>
+</body>
+</html>
