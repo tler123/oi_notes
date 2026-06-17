@@ -1,0 +1,514 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>前缀和模拟器</title>
+    <style>
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            font-family: system-ui, -apple-system, 'Segoe UI', Roboto, 'Helvetica Neue', sans-serif;
+            background: #f8fafc;
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 1.5rem;
+            color: #0b1c2f;
+        }
+
+        .card {
+            max-width: 920px;
+            width: 100%;
+            background: white;
+            border-radius: 32px;
+            box-shadow: 0 20px 40px -12px rgba(0, 20, 30, 0.15), 0 4px 12px rgba(0, 0, 0, 0.03);
+            padding: 2.2rem 2rem 2.5rem;
+            transition: box-shadow 0.2s;
+        }
+
+        h1 {
+            font-size: 1.9rem;
+            font-weight: 500;
+            letter-spacing: -0.02em;
+            margin-bottom: 0.1rem;
+            color: #0b2b44;
+        }
+
+        .subhead {
+            font-size: 0.95rem;
+            color: #54738f;
+            border-bottom: 1px solid #e9edf2;
+            padding-bottom: 1.4rem;
+            margin-bottom: 1.8rem;
+            display: flex;
+            justify-content: flex-end;
+            align-items: flex-end;
+            flex-wrap: wrap;
+            gap: 0.6rem 1rem;
+        }
+
+        .subhead span {
+            background: #f1f5f9;
+            padding: 0.2rem 0.8rem;
+            border-radius: 40px;
+            font-size: 0.8rem;
+            color: #2f4b66;
+        }
+
+        .array-panel {
+            background: #f2f6fc;
+            border-radius: 24px;
+            padding: 1.8rem 1.2rem 1.2rem;
+            margin-bottom: 2rem;
+        }
+
+        .array-label {
+            display: flex;
+            justify-content: space-between;
+            font-size: 0.75rem;
+            text-transform: uppercase;
+            letter-spacing: 0.03em;
+            color: #3f617e;
+            padding: 0 0.2rem 0.4rem;
+            font-weight: 500;
+        }
+
+        .array-items {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 0.5rem 0.6rem;
+            justify-content: center;
+        }
+
+        .item {
+            background: white;
+            border-radius: 16px;
+            padding: 0.6rem 0.2rem;
+            min-width: 72px;
+            text-align: center;
+            font-size: 1rem;
+            font-weight: 500;
+            color: #0b2b44;
+            box-shadow: 0 2px 6px rgba(0,0,0,0.02), 0 1px 2px rgba(0,0,0,0.03);
+            border: 1px solid #dce3ec;
+            transition: 0.15s;
+            flex: 0 1 auto;
+        }
+
+        .item .index {
+            font-size: 0.7rem;
+            font-weight: 400;
+            color: #6f8ba8;
+            display: block;
+            margin-bottom: 2px;
+            letter-spacing: 0.02em;
+        }
+
+        .item .value-input {
+            font-size: 1.2rem;
+            font-weight: 600;
+            line-height: 1.3;
+            width: 48px;
+            border: none;
+            background: transparent;
+            text-align: center;
+            color: #0d3557;
+            font-family: inherit;
+            padding: 0;
+            outline: none;
+            border-radius: 8px;
+            transition: background 0.15s;
+        }
+
+        .item .value-input:focus {
+            background: rgba(45, 100, 200, 0.08);
+            box-shadow: 0 0 0 2px rgba(56, 132, 255, 0.2);
+        }
+
+        .item .value-input:hover {
+            background: rgba(0,0,0,0.03);
+        }
+
+        .item .value-input::-webkit-outer-spin-button,
+        .item .value-input::-webkit-inner-spin-button {
+            -webkit-appearance: none;
+            margin: 0;
+        }
+        .item .value-input[type=number] {
+            -moz-appearance: textfield;
+        }
+
+        .item.prefix-highlight {
+            background: #d4e2f7;
+            border-color: #7ea5d9;
+            box-shadow: 0 0 0 2px rgba(56, 132, 255, 0.15);
+        }
+
+        .item.prefix-highlight .index {
+            color: #1f4b7a;
+        }
+
+        .item.prefix-highlight .value-input {
+            color: #0d3557;
+        }
+
+        .controls {
+            display: flex;
+            flex-wrap: wrap;
+            align-items: center;
+            gap: 1rem 1.5rem;
+            margin-top: 0.8rem;
+            margin-bottom: 1.8rem;
+            background: #ffffff;
+            padding: 1rem 1.2rem;
+            border-radius: 40px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.02);
+            border: 1px solid #e2e9f2;
+        }
+
+        .control-group {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem 0.8rem;
+            flex-wrap: wrap;
+        }
+
+        .control-group label {
+            font-size: 0.85rem;
+            font-weight: 480;
+            color: #1e3b54;
+        }
+
+        input[type="range"] {
+            width: 160px;
+            height: 4px;
+            -webkit-appearance: none;
+            background: #cbd8e8;
+            border-radius: 12px;
+            outline: none;
+            transition: background 0.2s;
+        }
+
+        input[type="range"]::-webkit-slider-thumb {
+            -webkit-appearance: none;
+            width: 16px;
+            height: 16px;
+            border-radius: 50%;
+            background: #1d6bc3;
+            cursor: pointer;
+            box-shadow: 0 2px 6px rgba(22, 78, 161, 0.25);
+            border: 2px solid white;
+            transition: 0.1s;
+        }
+
+        input[type="range"]::-webkit-slider-thumb:hover {
+            transform: scale(1.12);
+            background: #1a5fb0;
+        }
+
+        .value-badge {
+            min-width: 34px;
+            background: #e9f0f8;
+            border-radius: 30px;
+            padding: 0.2rem 0.7rem;
+            font-size: 0.9rem;
+            font-weight: 500;
+            color: #124072;
+            text-align: center;
+        }
+
+        .btn-reset {
+            background: #eef3f9;
+            border: 1px solid #cbd8e8;
+            color: #1d3d5c;
+            padding: 0.35rem 1.2rem;
+            border-radius: 40px;
+            font-size: 0.8rem;
+            font-weight: 500;
+            cursor: pointer;
+            transition: 0.15s;
+            margin-left: auto;
+            letter-spacing: 0.02em;
+        }
+
+        .btn-reset:hover {
+            background: #e1eaf3;
+            border-color: #a8bed8;
+            color: #0a2740;
+        }
+
+        .btn-reset:active {
+            transform: scale(0.96);
+        }
+
+        .prefix-info {
+            background: #ffffff;
+            border-radius: 20px;
+            padding: 1.2rem 1.4rem;
+            border: 1px solid #e2eaf3;
+            display: flex;
+            flex-wrap: wrap;
+            align-items: baseline;
+            justify-content: space-between;
+            gap: 0.6rem 1.2rem;
+        }
+
+        .prefix-result {
+            display: flex;
+            align-items: baseline;
+            gap: 0.4rem 1rem;
+            flex-wrap: wrap;
+        }
+
+        .prefix-result .label {
+            font-size: 0.85rem;
+            font-weight: 450;
+            color: #3a5b78;
+        }
+
+        .prefix-result .number {
+            font-size: 1.5rem;
+            font-weight: 500;
+            color: #0d3557;
+            letter-spacing: -0.01em;
+            background: #f0f6fe;
+            padding: 0.1rem 1rem;
+            border-radius: 40px;
+            border: 1px solid #d1e0f2;
+        }
+
+        .prefix-range {
+            font-size: 0.95rem;
+            background: #f4f8ff;
+            padding: 0.3rem 1.2rem;
+            border-radius: 40px;
+            color: #21517a;
+            border: 1px solid #d5e2f2;
+            word-break: break-all;
+            max-width: 100%;
+            line-height: 1.7;
+            font-family: 'Times New Roman', 'STIX', 'Latin Modern Math', serif;
+        }
+
+        @media (max-width: 560px) {
+            .card { padding: 1.5rem 1rem; }
+            .controls { flex-direction: column; align-items: stretch; gap: 0.8rem; border-radius: 28px; }
+            .control-group { justify-content: space-between; }
+            .btn-reset { margin-left: 0; width: 100%; text-align: center; padding: 0.5rem; }
+            .array-items { gap: 0.4rem; }
+            .item { min-width: 60px; padding: 0.5rem 0.1rem; }
+            .item .value-input { width: 40px; font-size: 1.1rem; }
+            .prefix-range { font-size: 0.8rem; padding: 0.3rem 0.8rem; }
+        }
+    </style>
+</head>
+<body>
+
+<div class="card">
+    <h1>前缀和模拟器</h1>
+    <div class="subhead">
+        <span></span>
+    </div>
+
+    <!-- 数组展示 -->
+    <div class="array-panel">
+        <div class="array-label">
+            <span>索引 i</span>
+            <span>值 a[i]</span>
+        </div>
+        <div id="arrayContainer" class="array-items">
+            <!-- 由 js 动态渲染 -->
+        </div>
+    </div>
+
+    <!-- 控制栏 -->
+    <div class="controls">
+        <div class="control-group">
+            <label for="prefixSlider">前缀长度 (前 n 项)</label>
+            <input type="range" id="prefixSlider" min="0" max="9" value="3" step="1">
+            <span id="sliderValue" class="value-badge">3</span>
+        </div>
+        <button id="resetBtn" class="btn-reset">↺ 重置</button>
+    </div>
+
+    <!-- 显示前缀和结果 -->
+    <div class="prefix-info">
+        <div class="prefix-result">
+            <span class="label">p[n]</span>
+            <span id="prefixSumDisplay" class="number">15</span>
+        </div>
+        <div id="prefixRangeDisplay" class="prefix-range">
+            a[1] + a[2] + a[3] = 3 + 7 + 5
+        </div>
+    </div>
+</div>
+
+<script>
+    (function() {
+        // ----- 初始数据 (数组元素初始有数值，非全0) -----
+        let currentArray = [3, 7, 5, 2, 8, 4, 6, 1, 9];
+        const MAX_LENGTH = currentArray.length;
+
+        // DOM 元素
+        const arrayContainer = document.getElementById('arrayContainer');
+        const prefixSlider = document.getElementById('prefixSlider');
+        const sliderValue = document.getElementById('sliderValue');
+        const prefixSumDisplay = document.getElementById('prefixSumDisplay');
+        const prefixRangeDisplay = document.getElementById('prefixRangeDisplay');
+        const resetBtn = document.getElementById('resetBtn');
+
+        // 设置滑块属性
+        prefixSlider.min = 0;
+        prefixSlider.max = MAX_LENGTH;
+        prefixSlider.value = 3;
+
+        // ----- 辅助函数: 计算前缀和 (前 n 项) -----
+        function computePrefixSum(arr, n) {
+            if (n <= 0) return 0;
+            const limit = Math.min(n, arr.length);
+            let sum = 0;
+            for (let i = 0; i < limit; i++) {
+                sum += arr[i];
+            }
+            return sum;
+        }
+
+        // ----- 获取当前数组数值 (从 input 读取) -----
+        function getCurrentArray() {
+            const inputs = arrayContainer.querySelectorAll('.value-input');
+            const newArr = [];
+            inputs.forEach(input => {
+                const val = parseFloat(input.value);
+                newArr.push(isNaN(val) ? 0 : val);
+            });
+            return newArr;
+        }
+
+        // ----- 渲染数组 (下标从1开始，带可编辑 input) -----
+        function renderArray(prefixLen) {
+            // 使用 currentArray 作为数据源，保留初始数值
+            const arr = currentArray.slice(); // 复制一份
+            while (arr.length < MAX_LENGTH) arr.push(0);
+            while (arr.length > MAX_LENGTH) arr.pop();
+
+            const safeLen = Math.min(Math.max(0, prefixLen), MAX_LENGTH);
+
+            arrayContainer.innerHTML = '';
+
+            for (let i = 0; i < arr.length; i++) {
+                const itemDiv = document.createElement('div');
+                itemDiv.className = 'item';
+                if (i < safeLen) {
+                    itemDiv.classList.add('prefix-highlight');
+                }
+                const displayIndex = i + 1;
+                itemDiv.innerHTML = `
+                    <span class="index">${displayIndex}</span>
+                    <input type="number" class="value-input" value="${arr[i]}" step="any" data-index="${i}">
+                `;
+                arrayContainer.appendChild(itemDiv);
+            }
+
+            // 绑定 input 事件
+            const inputs = arrayContainer.querySelectorAll('.value-input');
+            inputs.forEach(input => {
+                input.addEventListener('input', function(e) {
+                    const idx = parseInt(this.dataset.index, 10);
+                    const val = parseFloat(this.value);
+                    if (!isNaN(val)) {
+                        currentArray[idx] = val;
+                    } else {
+                        currentArray[idx] = 0;
+                    }
+                    const currentLen = parseInt(prefixSlider.value, 10);
+                    updateDisplay(currentLen);
+                });
+                input.addEventListener('blur', function(e) {
+                    if (this.value.trim() === '') {
+                        this.value = '0';
+                        const idx = parseInt(this.dataset.index, 10);
+                        currentArray[idx] = 0;
+                        const currentLen = parseInt(prefixSlider.value, 10);
+                        updateDisplay(currentLen);
+                    }
+                });
+            });
+
+            updateDisplay(safeLen);
+        }
+
+        // ----- 更新显示 (前缀和、公式、滑块数值) -----
+        function updateDisplay(prefixLen) {
+            const arr = getCurrentArray();
+            const safeLen = Math.min(Math.max(0, prefixLen), MAX_LENGTH);
+
+            // 更新高亮
+            const items = arrayContainer.querySelectorAll('.item');
+            items.forEach((item, idx) => {
+                if (idx < safeLen) {
+                    item.classList.add('prefix-highlight');
+                } else {
+                    item.classList.remove('prefix-highlight');
+                }
+            });
+
+            const sum = computePrefixSum(arr, safeLen);
+            prefixSumDisplay.textContent = sum;
+
+            sliderValue.textContent = safeLen;
+            prefixSlider.value = safeLen;
+
+            const count = safeLen;
+            if (count === 0) {
+                prefixRangeDisplay.textContent = 'p[0] = 0';
+            } else if (count === 1) {
+                prefixRangeDisplay.textContent = `p[1] = a[1] = ${arr[0]}`;
+            } else {
+                const terms = [];
+                const valTerms = [];
+                for (let i = 0; i < count; i++) {
+                    terms.push(`a[${i + 1}]`);
+                    valTerms.push(arr[i]);
+                }
+                const indexExpr = terms.join(' + ');
+                const valExpr = valTerms.join(' + ');
+                prefixRangeDisplay.textContent = `p[${count}] = ${indexExpr} = ${valExpr}`;
+            }
+        }
+
+        // ----- 滑块事件 -----
+        function onSliderChange() {
+            const val = parseInt(prefixSlider.value, 10);
+            const clamped = Math.min(Math.max(0, val), MAX_LENGTH);
+            updateDisplay(clamped);
+        }
+
+        // ----- 重置 (恢复初始数组和前缀长度3) -----
+        function resetToDefault() {
+            currentArray = [3, 7, 5, 2, 8, 4, 6, 1, 9];
+            const defaultLen = 3;
+            prefixSlider.value = defaultLen;
+            renderArray(defaultLen);
+        }
+
+        // ----- 初始化 -----
+        function init() {
+            const initialLen = 3;
+            prefixSlider.value = initialLen;
+            renderArray(initialLen);
+
+            prefixSlider.addEventListener('input', onSliderChange);
+            resetBtn.addEventListener('click', resetToDefault);
+        }
+
+        init();
+    })();
+</script>
+</body>
+</html>
